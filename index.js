@@ -4,16 +4,13 @@ import { Server } from "socket.io";
 import mongoose from "mongoose";
 import UserModel from "./models/user.js";
 
-mongoose.connect("mongodb+srv://packarit:6543210@cluster0.egattjp.mongodb.net/", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect("mongodb+srv://packarit:6543210@cluster0.egattjp.mongodb.net/");
 
 const httpServer = createServer();
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
+    origin: "https://packar-it.vercel.app",
     methods: ["GET", "POST"],
   },
 });
