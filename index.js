@@ -53,7 +53,7 @@ io.on("connection", async (socket) => {
     console.log("A user disconnected:", socket.id);
   });
 
-  socket.on("session", ({ session, userInfo }) => {
+  socket.on("session", ( session, userInfo ) => {
     console.log("Received session information:", session);
     socket.userInfo = userInfo;
     socket.broadcast.emit("receive_message", userInfo); 
