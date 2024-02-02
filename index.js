@@ -105,7 +105,7 @@ io.on("connection", async (socket) => {
   });
 });
 
-const PORT = 3001;
+const PORT = 10000;
 httpServer.listen(PORT, () => {
   console.log(`Socket.io server is running on port ${PORT}`);
 });
