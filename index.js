@@ -59,6 +59,7 @@ io.on("connection", async (socket) => {
     socket.broadcast.emit("receive_message", data); 
 
   });
+  console.log("Usuario conectado:", socket.userInfo);
 
   socket.on("send_message", (data) => {
     console.log("Mensaje recibido:", data);
