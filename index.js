@@ -1,41 +1,107 @@
 import cors from "cors";
-import { createServer } from "http";
+import http from "http";
 import { Server } from "socket.io";
-import mongoose from "mongoose";
-import UserModel from "./models/user.js";
+import { getSession } from "next-auth/react";
 
-mongoose.connect("mongodb+srv://packarit:6543210@cluster0.egattjp.mongodb.net/");
+// Función para obtener el socket según el userId
+function findSocketByUserId(userId) {
+  return Array.from(io.sockets.sockets.values()).find(
+    (socket) => socket.userInfo && socket.userInfo.userId === userId
+  );
+}
 
-const httpServer = createServer();
+const httpServer = http.createServer();
+
+// Variable para rastrear el estado de las notificaciones
+const notifications = {};
+
+async function obtenerUserIdDeInicoSesion(socket) {
+  const session = await getSession({ req: socket.request });
+  if (session) {
+    return {
+      userId: session.user.id,
+      email: session.user.email,
+      fullname: session.user.name,
+    };
+  } else {
+    return null;
+  }
+}
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "https://packar-it-9i79.vercel.app",
+    origin: "https://packar-it-9i79.vercel.app/",
     methods: ["GET", "POST"],
   },
 });
 
 io.on("connection", async (socket) => {
   console.log(
-    `A user connected: ${socket.userInfo ? socket.userInfo.email : "Guest"} - ${
-      socket.id
-    }`
+    `A user connected: ${socket.userInfo ? socket.userInfo.email : "Guest"} - ${socket.id}`
   );
 
-  const user = await UserModel.findById(socket.userId);
+  // Accede a la información del usuario proporcionada al conectarse.
+  const userInfo = socket.userInfo;
+
+  if (userInfo) {
+    const { userId, fullname, email } = userInfo;
+    socket.userInfo = { userId, fullname, email };
+    console.log(`User ID: ${userId}, Fullname: ${fullname}`);
+  }
 
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
   });
 
+  socket.on("session", ({ session, userInfo }) => {
+    console.log("Received session information:", session);
+    socket.userInfo = userInfo;
+  });
+
   socket.on("send_message", (data) => {
     console.log("Mensaje recibido:", data);
+    socket.broadcast.emit("receive_message", data);
+    socket.broadcast.emit("alert_new_message", {
+      message: "Nuevo mensaje de !",
+    });
+  });
 
-    io.emit("receive_message", data);
+  socket.on(
+    "send_notification_to_user",
+    ({ notificationId, recipientUserId, notification }) => {
+      const recipientSocket = findSocketByUserId(recipientUserId);
+      if (recipientSocket) {
+        notifications[notificationId] = { accepted: false, canceled: false };
+        recipientSocket.emit("receive_notification", {
+          notificationId,
+          notification,
+        });
+      }
+    }
+  );
+
+  socket.on("accept_notification", ({ notificationId }) => {
+    const notification = notifications[notificationId];
+    if (notification?.accepted || notification?.canceled) {
+      return;
+    }
+
+    if (!notifications[notificationId]) {
+      notifications[notificationId] = { accepted: false, canceled: false };
+    }
+
+    notifications[notificationId].accepted = true;
+    const acceptingUser = socket.userInfo;
+
+    console.log("Usuario que aceptó la notificación:", acceptingUser);
+
+    io.to(socket.id).emit("notification_accepted", { notificationId });
+
+    console.log("Te aceptaron la notificación");
   });
 });
 
-const PORT = process.env.PORT || 10000;
+const PORT = 3001;
 httpServer.listen(PORT, () => {
   console.log(`Socket.io server is running on port ${PORT}`);
 });
