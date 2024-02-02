@@ -30,8 +30,10 @@ io.on("connection", async (socket) => {
 
   socket.on("send_message", (data) => {
     console.log("Mensaje recibido:", data);
-
-    io.emit("receive_message", data);
+    socket.broadcast.emit("receive_message", data);
+    socket.broadcast.emit("alert_new_message", {
+      message: "Nuevo mensaje de !",
+    });
   });
 });
 
