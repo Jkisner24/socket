@@ -10,7 +10,7 @@ const httpServer = createServer();
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "https://packar-it-9i79.vercel.app/",
+    origin: "https://packar-it-9i79.vercel.app",
     methods: ["GET", "POST"],
   },
 });
@@ -30,10 +30,8 @@ io.on("connection", async (socket) => {
 
   socket.on("send_message", (data) => {
     console.log("Mensaje recibido:", data);
-    socket.broadcast.emit("receive_message", data);
-    socket.broadcast.emit("alert_new_message", {
-      message: "Nuevo mensaje de !",
-    });
+
+    io.emit("receive_message", data);
   });
 });
 
