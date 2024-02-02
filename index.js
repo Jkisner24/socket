@@ -14,7 +14,7 @@ const io = new Server(httpServer, {
     methods: ["GET", "POST"],
   },
 });
-
+ 
 io.on("connection", async (socket) => {
   console.log(
     `A user connected: ${socket.userInfo ? socket.userInfo.email : "Guest"} - ${
