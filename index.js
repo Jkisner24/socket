@@ -60,10 +60,9 @@ io.on("connection", async (socket) => {
 
   socket.on("session", (session, userInfo) => {
     console.log("Received session information:", session);
-    socket.userInfo = userInfo;
-    socket.broadcast.emit("receive_message", userInfo);
+    socket.broadcast.emit("receive_message", userInfo.email);
     socket.broadcast.emit("alert_new_message", {
-      message: `Nuevo mensaje de:  ${userInfo.email}`,
+      message: `Nuevo mensaje de:  ${userInfo.fullname}`,
     });
   });
   console.log("Usuario conectado:", socket.userInfo);
