@@ -30,14 +30,19 @@ async function obtenerUserIdDeInicoSesion(socket) {
 
 const io = new Server(httpServer, {
   cors: {
-    origin: ["https://packar-it-9i79.vercel.app", "https://packar-it.vercel.app"],
+    origin: [
+      "https://packar-it-9i79.vercel.app",
+      "https://packar-it.vercel.app",
+    ],
     methods: ["GET", "POST"],
   },
 });
 
 io.on("connection", async (socket) => {
   console.log(
-    `A user connected: ${socket.userInfo ? socket.userInfo.email : "Guest"} - ${socket.id}`
+    `A user connected: ${socket.userInfo ? socket.userInfo.email : "Guest"} - ${
+      socket.id
+    }`
   );
 
   // Accede a la información del usuario proporcionada al conectarse.
@@ -53,21 +58,17 @@ io.on("connection", async (socket) => {
     console.log("A user disconnected:", socket.id);
   });
 
-  socket.on("session", ( session, userInfo ) => {
+  socket.on("session", (session, userInfo) => {
     console.log("Received session information:", session);
     socket.userInfo = userInfo;
-    socket.broadcast.emit("receive_message", userInfo); 
+    socket.broadcast.emit("receive_message", userInfo);
+    socket.broadcast.emit("alert_new_message", {
+      message: `Nuevo mensaje de:  ${userInfo.email}`,
+    });
   });
   console.log("Usuario conectado:", socket.userInfo);
 
-  socket.on("send_message", (data) => {
-    console.log("Mensaje recibido:", data);
-    socket.broadcast.emit("receive_message", data);
-    socket.broadcast.emit("alert_new_message", {
-      message: "Nuevo mensaje de !",
-    });
-  });
-
+ 
   socket.on(
     "send_notification_to_user",
     ({ notificationId, recipientUserId, notification }) => {
@@ -107,3 +108,14 @@ const PORT = 10000;
 httpServer.listen(PORT, () => {
   console.log(`Socket.io server is running on port ${PORT}`);
 });
+
+
+
+
+ //socket.on("send_message", (data) => {
+  //console.log("Mensaje recibido:", data);
+  //socket.broadcast.emit("receive_message", data);
+  //socket.broadcast.emit("alert_new_message", {
+  // message: "Nuevo mensaje de !",
+  //});
+  //});
