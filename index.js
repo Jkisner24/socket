@@ -46,7 +46,7 @@ io.on("connection", async (socket) => {
   );
 
   // Accede a la información del usuario proporcionada al conectarse.
-  const userInfo = socket.userInfo;
+  const userInfo = await obtenerUserIdDeInicoSesion(socket);
 
   if (userInfo) {
     const { userId, fullname, email } = userInfo;
@@ -56,18 +56,20 @@ io.on("connection", async (socket) => {
 
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
+
+    // Manejo de desconexiones: Puedes realizar acciones adicionales al usuario desconectarse.
   });
 
-  socket.on("session", ({ session, userInfo }) => {
+  socket.on("session", async ({ session, userInfo }) => {
     console.log("Received session information:", session);
-    socket.broadcast.emit("receive_message", userInfo);
-    socket.broadcast.emit("alert_new_message", {
+    socket.emit("receive_message", userInfo);
+    socket.emit("alert_new_message", {
       message: `Nuevo mensaje de:  ${userInfo.fullname}`,
     });
   });
-    console.log("Usuario conectado:", socket.userInfo);
 
- 
+  console.log("Usuario conectado:", socket.userInfo);
+
   socket.on(
     "send_notification_to_user",
     ({ notificationId, recipientUserId, notification }) => {
@@ -107,14 +109,3 @@ const PORT = 10000;
 httpServer.listen(PORT, () => {
   console.log(`Socket.io server is running on port ${PORT}`);
 });
-
-
-
-
- //socket.on("send_message", (data) => {
-  //console.log("Mensaje recibido:", data);
-  //socket.broadcast.emit("receive_message", data);
-  //socket.broadcast.emit("alert_new_message", {
-  // message: "Nuevo mensaje de !",
-  //});
-  //});
