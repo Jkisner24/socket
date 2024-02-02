@@ -58,14 +58,14 @@ io.on("connection", async (socket) => {
     console.log("A user disconnected:", socket.id);
   });
 
-  socket.on("session", (session, userInfo) => {
+  socket.on("session", ({ session, userInfo }) => {
     console.log("Received session information:", session);
     socket.broadcast.emit("receive_message", userInfo.email);
     socket.broadcast.emit("alert_new_message", {
       message: `Nuevo mensaje de:  ${userInfo.fullname}`,
     });
   });
-  console.log("Usuario conectado:", socket.userInfo);
+    console.log("Usuario conectado:", socket.userInfo);
 
  
   socket.on(
