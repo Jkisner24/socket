@@ -30,7 +30,7 @@ async function obtenerUserIdDeInicoSesion(socket) {
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "https://packar-it-9i79.vercel.app/",
+    origin: "https://packar-it-9i79.vercel.app/" || "https://packar-it.vercel.app/",
     methods: ["GET", "POST"],
   },
 });
@@ -57,6 +57,7 @@ io.on("connection", async (socket) => {
     console.log("Received session information:", session);
     socket.userInfo = userInfo;
     socket.broadcast.emit("receive_message", data); 
+    
 
   });
   console.log("Usuario conectado:", socket.userInfo);
