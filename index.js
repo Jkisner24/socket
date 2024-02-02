@@ -57,6 +57,7 @@ io.on("connection", async (socket) => {
     console.log("Received session information:", session);
     socket.userInfo = userInfo;
     socket.broadcast.emit("receive_message", data); 
+    
 
   });
   console.log("Usuario conectado:", socket.userInfo);
